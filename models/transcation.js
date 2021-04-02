@@ -1,7 +1,7 @@
 const mongoose=require('mongoose');
 
 const Transcation=mongoose.model('Transcation',{
-    productId={
+    productId:{
         /*poduct id, which was purchased by the User */
         type:   mongoose.Schema.Types.ObjectId, 
         ref: 'Product'
@@ -10,6 +10,10 @@ const Transcation=mongoose.model('Transcation',{
         /*person id,who purchased the item */
         type:   mongoose.Schema.Types.ObjectId, 
         ref: 'User'
+    },
+    quantity:{
+        type: Number,
+        default: 1,
     }
 })
 
