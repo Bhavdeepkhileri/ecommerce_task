@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>login page</title>
+  </head>
+  <body>
+    <label for="aname"><b>Full Name</b></label>
+    <input id="username" type="text" placeholder="enter full name" name="aname" required />
+    <label for="uname"><b>email</b></label>
+    <input id="email" type="text" placeholder="Enter email" name="uname" required />
+    <label for="psw"><b>Password</b></label>
+    <input id="password" type="password" placeholder="Enter Password" name="psw" required />
+    <button type="submit" onclick="run()">Login</button>
+  </body>
+  <script>
+    function run() {
+        console.log("working");
+      var myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+      var raw = JSON.stringify({
+        name: document.getElementById('username').value,
+        email: document.getElementById('email').value,
+        password: document.getElementById('password').value,
+      });
+
+      var requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: raw,
+        redirect: "follow",
+        mode: 'cors',
+        cache: 'default',
+      };
+
+      fetch("/api/v1/signup", requestOptions)
+        .then((response) => response.text())
+        .then((result) => console.log(result))
+        .catch((error) => console.log("error", error));
+    }
+  </script>
+</html>

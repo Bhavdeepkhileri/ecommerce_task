@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>login page</title>
+  </head>
+  <body>
+      <label for="uname"><b>email</b></label>
+      <input id="email" type="text" placeholder="Enter Username" name="uname" required />
+      <label for="psw"><b>Password</b></label>
+      <input id="password" type="password" placeholder="Enter Password" name="psw" required />
+      <button type="submit" onclick="run()">Login</button>
+  </body>
+  <script>
+    function run() {
+        console.log("working");
+      var myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+      var raw = JSON.stringify({
+        email: document.getElementById('email').value,
+        password: document.getElementById('password').value,
+      });
+
+      var requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: raw,
+        redirect: "follow",
+        mode: 'cors',
+        cache: 'default',
+      };
+
+      fetch("/api/v1/login", requestOptions)
+        .then((response) =>{
+          console.log(response);
+          return response.text()})
+        .then((result) => {
+          let userdetail=JSON.parse(result);
+          console.log(userdetail.email);
+          redirect: window.location.replace('/api/v1/render?email=' + userdetail.email)
+        })
+        .catch((error) => console.log("error", error));
+    }
+  </script>
+</html>

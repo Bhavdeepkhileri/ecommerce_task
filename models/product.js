@@ -22,6 +22,10 @@ const Product = mongoose.model('Product', {
         type: Number,
         required: true,
         default: 1
+    },
+    IsDelete: {
+        type: Boolean,
+        default: false
     }
 })
 
