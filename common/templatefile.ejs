@@ -92,6 +92,8 @@
         var useremail=document.getElementById('email').innerHTML;
         myHeaders.append("Content-Type", "application/json");
         quantity=+prompt("how many item do you want",1);
+        if(!quantity)
+            return;
         let childs= event.parentNode.parentNode.childNodes;
         let productId=childs[1].innerHTML;
         let price=childs[5].innerHTML;
