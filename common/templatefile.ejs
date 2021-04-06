@@ -16,7 +16,7 @@
             </thead>
             <% for(let i=0; i < transcation.length ; i++){%>
                 <tr>
-                    <td><%= transcation[i].productName %></td>
+                    <td><%= transcation[i].productId.productName %></td>
                     <td><%= transcation[i].quantity %></td>
                     <td><%= transcation[i].totalAmount %></td>
                 </tr>
@@ -45,7 +45,7 @@
                       <td><%= quotation[i].productName %></td>
                       <td><%= quotation[i].price %></td>
                       <td><%= quotation[i].quantity %></td>
-                      <td><button type="button" class="btn btn-primary">update</button></td>
+                      <td><button type="button" class="btn btn-primary" onclick="update(this)">update</button></td>
                       <td><button type="button" class="btn btn-primary" onclick="itemDelete(this)">delete</button></td>
                       <td><button type="button" class="btn btn-primary" onclick="buy(this)">buy</button></td>
                     </tr> 
@@ -142,6 +142,43 @@
             };
 
             fetch("/api/v1/delete-item", requestOptions)
+            .then((response) =>{
+                return response.text()})
+            .then((result) => {
+                console.log(result);
+            })
+            .catch((error) => console.log("cannot add item", error));
+    }
+    function update(event){
+        let childs= event.parentNode.parentNode.childNodes;
+        let productId=childs[1].innerHTML;
+        let productName=childs[3].innerHTML;
+        productName=prompt("change product name",productName);
+        let price = childs[5].innerHTML;
+        price=+prompt("change price",price);
+        let quantity= childs[7].innerHTML;
+        quantity=+prompt("change quantity",quantity);
+
+        var myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+
+        var raw = JSON.stringify({
+        productId: productId,
+        productName: productName,
+        price: price,
+        quantity: quantity
+        });
+
+        let requestOptions = {
+            method: "POST",
+            headers: myHeaders,
+            body: raw,
+            redirect: "follow",
+            mode: 'cors',
+            cache: 'default',
+            };
+
+            fetch("/api/v1/update-item", requestOptions)
             .then((response) =>{
                 return response.text()})
             .then((result) => {

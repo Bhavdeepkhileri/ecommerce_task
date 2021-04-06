@@ -35,8 +35,13 @@
           return response.text()})
         .then((result) => {
           let userdetail=JSON.parse(result);
-          console.log(userdetail.email);
-          redirect: window.location.replace('/api/v1/render?email=' + userdetail.email)
+          if(userdetail.email)
+          {
+            console.log(userdetail.email);
+            redirect: window.location.replace('/api/v1/render?email=' + userdetail.email)
+          }
+          else
+            console.log(userdetail.response);
         })
         .catch((error) => console.log("error", error));
     }
