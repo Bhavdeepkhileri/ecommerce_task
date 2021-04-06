@@ -13,7 +13,6 @@ router.post('/api/v1/signup',(req,res)=>{
     */
     const saltRounds = 10;
     const password = req.body.password;
-    console.log(req.body);
     bcrypt.hash(password, saltRounds, function(err, hash) {
         // Store hash in your password DB.
         if(err)
@@ -27,7 +26,7 @@ router.post('/api/v1/signup',(req,res)=>{
         }).catch((e) => {
             res.status(400)
             if(e.driver==true)
-                res.send("email id already in use");
+                res.send({value:true});
             else 
                 res.send(e);
         })

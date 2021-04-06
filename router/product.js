@@ -32,16 +32,28 @@ router.post('/api/v1/add-item',(req,res)=>{
         }).catch((e)=>{res.send(e)})
     })
 });
-
+router.get('/api/v1/transaction-history',async (req,res)=>
+{
+    var passedVariable = req.query.email;
+    const user=await User.findOne({email: passedVariable});
+    if(user==null)
+        return res.send("user does not exist");
+    const transcation =await Transcation.find({userId:new mongoose.Types.ObjectId(user._id)}).populate('productId');
+    ejs.renderFile(path.join(__dirname,'../common/transactionRenderFile.ejs'),{user:user,transcation:transcation},(err,str)=>
+    {
+       res.send(str);
+    })
+})
 router.get('/api/v1/render',async (req,res)=>{
     /*
     rendering ejs page for showing product list and transaction history
     */
     var passedVariable = req.query.email;
     const user=await User.findOne({email: passedVariable});
-    const quotation = await Product.find().populate('userId','email',null,{sort:{email: -1}})
-    const transcation =await Transcation.find({userId:new mongoose.Types.ObjectId(user._id)}).populate('productId');
-    ejs.renderFile(path.join(__dirname,'../common/templatefile.ejs'),{user:user,transcation:transcation,quotation:quotation},(err,str)=>
+    if(user==null)
+        return res.send("user does not exist");
+    const quotation = await Product.find({}).populate('userId')
+    ejs.renderFile(path.join(__dirname,'../common/templatefile.ejs'),{user:user,quotation:quotation},(err,str)=>
     {
        res.send(str);
     })

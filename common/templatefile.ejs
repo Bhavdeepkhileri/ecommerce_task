@@ -2,37 +2,49 @@
     <head>
         <title>render page</title>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+        <style>
+            .ndisplay{
+                display:none;
+            }
+            form{
+                margin-bottom: 25px;
+            }
+            
+        </style>
     </head>
     <body>
         <h1>Welcome <%=user.name%></h1>
         <p id="email"><%=user.email%></p>
-        <button type="button" class="btn btn-primary" onClick="addItem()">Add item</button>
-        <h3>Your trancation history:</h3>
-        <table class="table">
-            <thead>
-                <th>Product Name</th>
-                <th>quantity</th>
-                <th>total price</th>
-            </thead>
-            <% for(let i=0; i < transcation.length ; i++){%>
-                <tr>
-                    <td><%= transcation[i].productId.productName %></td>
-                    <td><%= transcation[i].quantity %></td>
-                    <td><%= transcation[i].totalAmount %></td>
-                </tr>
-                <%}%>
-            <tbody>
+        <!--
+            form to add item to the database
+        -->
+        <form action="javascript:;">
+            <div class="form-group" >
+              <label for="productName">Product Name</label>
+              <input type="text" class="form-control" id="productName" placeholder="Product Name" required>
+            <div class="form-group">
+              <label for="price">Price</label>
+              <input type="text" class="form-control" id="price" placeholder="Enter price" required>
+            </div>
+            <div class="form-group">
+                <label for="qunatity">Quantity</label>
+                <input type="text" class="form-control" id="quantity" placeholder="Enter available quantity" required>
+            </div>
+            <button type="submit" class="btn btn-primary" onClick="addItem()"> Add Item</button>
+        </form><br><br>
 
-            </tbody>
-        </table>
+        <button type="button" class="btn btn-secondary" onClick="history()">Purchase history</button>
+
         <h3>Product list:</h3>
         <table class="table">
             <thead>
                 <tr>
-                    <th>product id</th>
+                    <th>Serial no.</th>
+                    <th class="ndisplay">product id</th>
                     <th>product name</th>
                     <th>price</th>
                     <th>quantity</th>
+                    <th>seller</th>
                 </tr>
             </thead>
             <tbody>
@@ -40,12 +52,15 @@
                     <% if(quotation[i].IsDelete) {%>
                         <% continue %>
                     <%} else {%>
+                
                     <tr>
-                      <td><%= quotation[i]._id %></td>
+                      <td><%= i+1 %></td>
+                      <td class="ndisplay"><%= quotation[i]._id %></td>
                       <td><%= quotation[i].productName %></td>
                       <td><%= quotation[i].price %></td>
                       <td><%= quotation[i].quantity %></td>
-                      <td><button type="button" class="btn btn-primary" onclick="update(this)">update</button></td>
+                      <td><%= quotation[i].userId.name %></td>
+                      <td><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" onClick="setform(this)">update</button></td>
                       <td><button type="button" class="btn btn-primary" onclick="itemDelete(this)">delete</button></td>
                       <td><button type="button" class="btn btn-primary" onclick="buy(this)">buy</button></td>
                     </tr> 
@@ -53,21 +68,66 @@
                 <% } %>
             </tbody>
         </table>
+        <!-- 
+            pop up form to update item
+        -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Update item</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                    <form action="javascript:;">
+                        <div class="form-group" >
+                          <label for="changeproductName">Product Name</label>
+                          <input type="text" class="form-control" id="changeproductName" placeholder="Product Name" required>
+                        <div class="form-group">
+                          <label for="changeprice">Price</label>
+                          <input type="text" class="form-control" id="changeprice" placeholder="Enter price" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="changequnatity">Quantity</label>
+                            <input type="text" class="form-control" id="changequantity" placeholder="Enter available quantity" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-primary"  data-dismiss="modal" onClick="update()">Save changes</button>
+                </div>
+              </div>
+            </div>
+          </div>
     </body>
     <script>
+        var idProduct=0;
         function addItem()
         {
             console.log("working");
             let myHeaders = new Headers();
             let useremail=document.getElementById('email').innerHTML;
             myHeaders.append("Content-Type", "application/json");
+
+            let productName=document.getElementById("productName").value;
+            let price=document.getElementById("price").value;
+            let quantity=document.getElementById("quantity").value;
+            if(!productName.length || !price.length || !quantity.length)
+                return alert("item cannot be added");
             let raw = JSON.stringify({
             email: useremail,
-            productName: prompt("name of the product"),
-            price:prompt("price of the product"),
-            quantity:prompt("quantity of the product")
+            productName: productName,
+            price:+price,
+            quantity:+quantity
             });
 
+
+            document.getElementById("productName").value="";
+            document.getElementById("price").value="";
+            document.getElementById("quantity").value="";
 
             let requestOptions = {
             method: "POST",
@@ -85,6 +145,7 @@
                 console.log(result);
             })
             .catch((error) => console.log("cannot add item", error));
+            alert("Item added");
     }
     function buy(event){
         console.log("working");
@@ -95,8 +156,8 @@
         if(!quantity)
             return;
         let childs= event.parentNode.parentNode.childNodes;
-        let productId=childs[1].innerHTML;
-        let price=childs[5].innerHTML;
+        let productId=childs[3].innerHTML;
+        let price=childs[7].innerHTML;
         console.log(quantity*+price)
         var raw = JSON.stringify({
         email: useremail,
@@ -128,7 +189,7 @@
         var myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/json");
         let childs= event.parentNode.parentNode.childNodes;
-        let productId=childs[1].innerHTML;
+        let productId=childs[3].innerHTML;
 
         var raw = JSON.stringify({
         productId: productId
@@ -151,15 +212,12 @@
             })
             .catch((error) => console.log("cannot add item", error));
     }
-    function update(event){
-        let childs= event.parentNode.parentNode.childNodes;
-        let productId=childs[1].innerHTML;
-        let productName=childs[3].innerHTML;
-        productName=prompt("change product name",productName);
-        let price = childs[5].innerHTML;
-        price=+prompt("change price",price);
-        let quantity= childs[7].innerHTML;
-        quantity=+prompt("change quantity",quantity);
+    function update(){
+
+        let productId=idProduct;
+        let productName=document.getElementById('changeproductName').value;
+        let price = document.getElementById('changeprice').value;
+        let quantity= document.getElementById('changequantity').value;
 
         var myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/json");
@@ -188,5 +246,21 @@
             })
             .catch((error) => console.log("cannot add item", error));
     }
+    function history(){
+        let useremail=document.getElementById('email').innerHTML;
+        let link=`http://localhost:3000/api/v1/transaction-history?email=${useremail}`;
+        window.open(link,'_blank')
+    }
+    function setform(event)
+    {
+        let childs=event.parentNode.parentNode.childNodes;
+        idProduct=childs[3].innerHTML;
+        document.getElementById('changeproductName').value=childs[5].innerHTML;
+        document.getElementById('changeprice').value=childs[7].innerHTML;
+        document.getElementById('changequantity').value=childs[9].innerHTML;
+    }
     </script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </html>

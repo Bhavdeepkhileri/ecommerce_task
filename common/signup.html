@@ -10,7 +10,7 @@
     <input id="email" type="text" placeholder="Enter email" name="uname" required />
     <label for="psw"><b>Password</b></label>
     <input id="password" type="password" placeholder="Enter Password" name="psw" required />
-    <button type="submit" onclick="run()">Login</button>
+    <button type="submit" onclick="run()">Signup</button>
   </body>
   <script>
     function run() {
@@ -34,10 +34,22 @@
 
       fetch("/api/v1/signup", requestOptions)
         .then((response) => response.text())
-        .then((result) => console.log(result))
+        .then((result) => {
+          result=JSON.parse(result);
+          if(result.value)
+          {
+            alert("email id already in use");
+            return;
+          }
+          else
+          {
+            alert("signup success full redirecting to login page")
+            window.location.replace("http://localhost:3000/login.html");
+          }
+        })
         .catch((error) => console.log("error", error));
 
-        window.location.replace("http://localhost:3000/login.html");
+        
 
     }
   </script>

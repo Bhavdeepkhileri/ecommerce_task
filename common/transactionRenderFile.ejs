@@ -1,0 +1,28 @@
+<html>
+    <head>
+        <title>
+            transaction histroy
+        </title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    </head>
+    <body>
+        <h3>Your trancation history:</h3>
+        <table class="table">
+            <thead>
+                <th>Product Name</th>
+                <th>quantity</th>
+                <th>total price</th>
+            </thead>
+            <% for(let i=0; i < transcation.length ; i++){%>
+                <tr>
+                    <td><%= transcation[i].productId.productName %></td>
+                    <td><%= transcation[i].quantity %></td>
+                    <td><%= transcation[i].totalAmount %></td>
+                </tr>
+                <%}%>
+            <tbody>
+
+            </tbody>
+        </table>
+    </body>
+</html>
