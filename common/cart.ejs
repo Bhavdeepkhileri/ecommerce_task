@@ -1,0 +1,115 @@
+<html>
+    <head>
+        <title>
+            your cart
+        </title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+        <style>
+            .ndisplay{
+                display:none;
+            }
+            form{
+                margin-bottom: 25px;
+            }
+            
+        </style>
+    </head>
+    <body>
+        <%var total=0 %>
+        <table class='table'> 
+            <thead>
+                <tr>
+                    <th>Sr no.</th>
+                    <th class='ndisplay'>productID</th>
+                    <th>product Name</th>
+                    <th>quantity</th>
+                    <th>price</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% for(let i=0; i < cart.products.length ; i++){ total= total + cart.products[i].quantity*+cart.products[i].productId.price%>
+                    <tr>
+                        <td><%= i+1 %></td>
+                        <td class="ndisplay"><%= cart.products[i].productId._id %></td>
+                        <td><%= cart.products[i].productId.productName %></td>
+                        <td><select name="quantity">
+                            <% for(var j= 1; j <= cart.products[i].productId.quantity ; j++) { %>
+                                <% if(cart.products[i].quantity==j) {%>
+                                    <option value='<%= j %>' selected><%= j %></option>
+                                <%continue}%>
+                              <option value='<%= j %>'><%= j %></option>
+                            <% } %>
+                          </select></td>
+                        <td><%= cart.products[i].productId.price %></td>
+                        <td><button class="btn btn-primary" onClick="Remove(this)">Remove</button></td>
+                    </tr>
+                    <%}%>
+            </tbody>
+        </table>
+        <h3>Total: <span id="changeTotal"><%= total %></span></h3>
+        <button class="btn btn-primary" onClick="checkout()">Checkout</button>
+    </body>
+    <script>
+        var url = new URL(window.location.href);
+        var useremail = url.searchParams.get("email");  
+        /* const selectElement = document.getElementsByTagName('select');
+        selectElement.addEventListener('change', (event) => {
+        const result = document.querySelector('.result');
+        result.textContent = `You like ${event.target.value}`;
+        }); */
+
+        function Remove(event){
+            var myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+        let childs= event.parentNode.parentNode.childNodes;
+        let productId=childs[3].innerHTML;
+        let quantity=childs[7].childNodes[0].value;
+        var raw = JSON.stringify({
+        email: useremail,
+        productId: productId,
+        quantity: quantity
+        });
+        console.log(raw);
+
+        let requestOptions = {
+            method: "POST",
+            headers: myHeaders,
+            body: raw,
+            redirect: "follow",
+            mode: 'cors',
+            cache: 'default',
+            };
+
+            fetch("/api/v1/cart-remove-item", requestOptions)
+            .then((response) =>{
+                return response.text()})
+            .then((result) => {
+                console.log(result);
+            })
+            .catch((error) => console.log("cannot add item", error));
+        }
+        function checkout(){
+            var myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+            var raw = JSON.stringify({
+            email: useremail,
+            totalAmount: +document.getElementById('changeTotal').innerHTML
+        })
+            let requestOptions = {
+            method: "POST",
+            headers: myHeaders,
+            body: raw,
+            redirect: "follow",
+            mode: 'cors',
+            cache: 'default',
+            };
+            fetch("/api/v1/checkout", requestOptions)
+            .then((response) =>{
+                return response.text()})
+            .then((result) => {
+                console.log(result);
+            })
+            .catch((error) => console.log("cannot be purchased", error));
+        }
+    </script>
+</html>

@@ -4,6 +4,7 @@
     <title>login page</title>
   </head>
   <body>
+    <form action="/api/v1/login" method="post" id="cpa-form">
       <label for="uname"><b>email</b></label>
       <input id="email" type="text" placeholder="Enter Username" name="uname" required />
       <label for="psw"><b>Password</b></label>
@@ -12,6 +13,7 @@
   </body>
   <script>
     function run() {
+      event.preventDefault();
         console.log("working");
       var myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/json");
@@ -45,5 +47,11 @@
         })
         .catch((error) => console.log("error", error));
     }
+    var form = document.getElementById('cpa-form');
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+    });
+
   </script>
 </html>

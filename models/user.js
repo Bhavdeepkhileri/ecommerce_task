@@ -27,6 +27,11 @@ const User = mongoose.model('User', {
     IsDelete: {
         type: Boolean,
         default: false
+    },
+    img:
+    {
+        type: String,
+        default: null
     }
 })
 

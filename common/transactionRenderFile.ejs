@@ -9,19 +9,37 @@
         <h3>Your trancation history:</h3>
         <table class="table">
             <thead>
-                <th>Product Name</th>
-                <th>quantity</th>
+                <th>Sr no.</th>
+                <th>Item list</th>
                 <th>total price</th>
             </thead>
+            <tbody>
             <% for(let i=0; i < transcation.length ; i++){%>
                 <tr>
-                    <td><%= transcation[i].productId.productName %></td>
-                    <td><%= transcation[i].quantity %></td>
+                    <td><%=  i+1 %></td>
+                    <td>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>product name</th>
+                                    <th>quantity</th>
+                                    <th>price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% for(let j=0; j< transcation[i].products.length ; j++ ){%>
+                                    <tr>
+                                    <td><%=transcation[i].products[j].productId.productName%></td>
+                                    <td><%=transcation[i].products[j].quantity%></td>
+                                    <td><%=transcation[i].products[j].productId.price%></td>
+                                    </tr>
+                                <%}%>
+                            </tbody>
+                        </table>
+                    </td>
                     <td><%= transcation[i].totalAmount %></td>
                 </tr>
                 <%}%>
-            <tbody>
-
             </tbody>
         </table>
     </body>

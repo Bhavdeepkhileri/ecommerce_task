@@ -1,18 +1,24 @@
 const express= require('express');
 const bcrypt = require('bcrypt');
 const router= new express.Router();
+const multer = require('multer');
+var upload = multer({ })
 //schema set up
 const mongoose=require('mongoose');
 const User = require('../models/user');
 
 
-router.post('/api/v1/signup',(req,res)=>{
+router.post('/api/v1/signup',upload.single('avatar'),(req,res)=>{
     /*
-    signup api and 
+    signup api and
     return 400 if email already in use
     */
     const saltRounds = 10;
     const password = req.body.password;
+    const encoded = req.file.buffer.toString('base64')
+    //let buf = Buffer.from(encoded, 'base64');
+    req.body.img=encoded;
+    //console.log(req.body.img)
     bcrypt.hash(password, saltRounds, function(err, hash) {
         // Store hash in your password DB.
         if(err)
@@ -52,7 +58,6 @@ router.post('/api/v1/login',async (req,res)=>{
         {
             return res.send({response:"Invalid user name or password"});
         }
-        console.log(result);
         res.send({email: result.email});
     })
 });

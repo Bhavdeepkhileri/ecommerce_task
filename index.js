@@ -6,7 +6,7 @@ const cors=require('cors');
 const ejs=require('ejs');
 const userRouter=require('./router/user')
 const productRouter=require('./router/product')
-
+const cartRouter=require('./router/cart')
 //global variable set up
 const port = 3000;
 const commonpath=path.join(__dirname+'/common')
@@ -20,6 +20,7 @@ app.set('view engine', 'ejs');
 app.use(cors());
 app.use(userRouter);
 app.use(productRouter);
+app.use(cartRouter);
 
 app.get('/',(req,res)=>{
     /*

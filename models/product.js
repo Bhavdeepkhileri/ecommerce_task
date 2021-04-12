@@ -26,6 +26,11 @@ const Product = mongoose.model('Product', {
     IsDelete: {
         type: Boolean,
         default: false
+    },
+    img:
+    {
+        type: String,
+        default: null
     }
 })
 

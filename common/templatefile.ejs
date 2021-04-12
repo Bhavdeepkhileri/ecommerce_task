@@ -18,20 +18,25 @@
         <!--
             form to add item to the database
         -->
-        <form action="javascript:;">
+        <form id="addItemForm">
             <div class="form-group" >
               <label for="productName">Product Name</label>
-              <input type="text" class="form-control" id="productName" placeholder="Product Name" required>
+              <input type="text" class="form-control" id="productName" name="productName" placeholder="Product Name" required>
             <div class="form-group">
               <label for="price">Price</label>
-              <input type="text" class="form-control" id="price" placeholder="Enter price" required>
+              <input type="text" class="form-control" id="price" name="price" placeholder="Enter price" required>
             </div>
             <div class="form-group">
                 <label for="qunatity">Quantity</label>
-                <input type="text" class="form-control" id="quantity" placeholder="Enter available quantity" required>
+                <input type="text" class="form-control" id="quantity" name="qunatity" placeholder="Enter available quantity" required>
             </div>
-            <button type="submit" class="btn btn-primary" onClick="addItem()"> Add Item</button>
-        </form><br><br>
+            <div class="form-group">
+                <label for="img">Item Image</label>
+                <input type="file" class="form-control" id="img" name="img" placeholder="Enter available quantity" required>
+            </div>
+            <button type="submit" class="btn btn-primary"> Add Item</button>
+        </form>
+        <br><br>
 
         <button type="button" class="btn btn-secondary" onClick="history()">Purchase history</button>
 
@@ -48,21 +53,22 @@
                 </tr>
             </thead>
             <tbody>
-                <% for (var i = 0; i < quotation.length; i++) { %>
+                <% for (var i = 0,temp=0; i < quotation.length; i++) { %>
                     <% if(quotation[i].IsDelete) {%>
                         <% continue %>
-                    <%} else {%>
+                    <%} else { temp++ %>
                 
                     <tr>
-                      <td><%= i+1 %></td>
+                      <td><%=temp %></td>
                       <td class="ndisplay"><%= quotation[i]._id %></td>
                       <td><%= quotation[i].productName %></td>
                       <td><%= quotation[i].price %></td>
                       <td><%= quotation[i].quantity %></td>
                       <td><%= quotation[i].userId.name %></td>
-                      <td><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" onClick="setform(this)">update</button></td>
-                      <td><button type="button" class="btn btn-primary" onclick="itemDelete(this)">delete</button></td>
-                      <td><button type="button" class="btn btn-primary" onclick="buy(this)">buy</button></td>
+                      <td><button class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" onClick="setform(this)">update</button></td>
+                      <td><button class="btn btn-primary" onclick="itemDelete(this)">delete</button></td>
+                      <td><button class="btn btn-primary" onclick="buy(this)">buy</button></td>
+                      <td><button class="btn btn-primary" onClick="toCart(this)">Add to cart</button></td>
                     </tr> 
                     <%}%>   
                 <% } %>
@@ -81,23 +87,23 @@
                   </button>
                 </div>
                 <div class="modal-body">
-                    <form action="javascript:;">
+                    <form id="updateItemForm">
                         <div class="form-group" >
                           <label for="changeproductName">Product Name</label>
-                          <input type="text" class="form-control" id="changeproductName" placeholder="Product Name" required>
+                          <input type="text" class="form-control" id="changeproductName"  name="productName" placeholder="Product Name" required>
                         <div class="form-group">
                           <label for="changeprice">Price</label>
-                          <input type="text" class="form-control" id="changeprice" placeholder="Enter price" required>
+                          <input type="text" class="form-control" id="changeprice" name="price" placeholder="Enter price" required>
                         </div>
                         <div class="form-group">
                             <label for="changequnatity">Quantity</label>
-                            <input type="text" class="form-control" id="changequantity" placeholder="Enter available quantity" required>
+                            <input type="text" class="form-control" id="changequantity" name="quantity" placeholder="Enter available quantity" required>
                         </div>
+                        <input type="submit" class="btn btn-primary" value="save changes">
                     </form>
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                  <button type="button" class="btn btn-primary"  data-dismiss="modal" onClick="update()">Save changes</button>
                 </div>
               </div>
             </div>
@@ -105,54 +111,32 @@
     </body>
     <script>
         var idProduct=0;
-        function addItem()
-        {
-            console.log("working");
-            let myHeaders = new Headers();
-            let useremail=document.getElementById('email').innerHTML;
-            myHeaders.append("Content-Type", "application/json");
+        addItemForm.onsubmit = async (e) => {
+        e.preventDefault();
+        let useremail=document.getElementById('email').innerHTML;
+        
+        let formdata= new FormData(addItemForm);
+        formdata.append("email",useremail)
 
-            let productName=document.getElementById("productName").value;
-            let price=document.getElementById("price").value;
-            let quantity=document.getElementById("quantity").value;
-            if(!productName.length || !price.length || !quantity.length)
-                return alert("item cannot be added");
-            let raw = JSON.stringify({
-            email: useremail,
-            productName: productName,
-            price:+price,
-            quantity:+quantity
-            });
-
-
-            document.getElementById("productName").value="";
-            document.getElementById("price").value="";
-            document.getElementById("quantity").value="";
-
-            let requestOptions = {
-            method: "POST",
-            headers: myHeaders,
-            body: raw,
-            redirect: "follow",
-            mode: 'cors',
-            cache: 'default',
-            };
-
-            fetch("/api/v1/add-item", requestOptions)
-            .then((response) =>{
+        let response = await fetch('/api/v1/add-item', {
+        method: 'POST',
+        body: formdata
+        }).then((response) =>{
                 return response.text()})
             .then((result) => {
                 console.log(result);
             })
             .catch((error) => console.log("cannot add item", error));
-            alert("Item added");
-    }
+            alert("Item added");;
+
+        //let result = await response.json();
+    };
     function buy(event){
         console.log("working");
         var myHeaders = new Headers();
         var useremail=document.getElementById('email').innerHTML;
         myHeaders.append("Content-Type", "application/json");
-        quantity=+prompt("how many item do you want",1);
+        quantity=+prompt("how many item do you want?",1);
         if(!quantity)
             return;
         let childs= event.parentNode.parentNode.childNodes;
@@ -182,7 +166,39 @@
                 console.log(result);
             })
             .catch((error) => console.log("cannot add item", error));
-
+    }
+    function toCart(event)
+    {
+        var myHeaders = new Headers();
+        let useremail=document.getElementById('email').innerHTML;
+        myHeaders.append("Content-Type", "application/json");
+        let childs= event.parentNode.parentNode.childNodes;
+        let productId=childs[3].innerHTML;
+        let price=childs[7].innerHTML;
+        let quantity=prompt("how many item you want to add to cart",1);
+        var raw = JSON.stringify({
+        productId: productId,
+        email: useremail,
+        quantity: quantity,
+        price: price
+        });
+        let requestOptions = {
+            method: "POST",
+            headers: myHeaders,
+            body: raw,
+            redirect: "follow",
+            mode: 'cors',
+            cache: 'default',
+            };
+            
+            fetch("/api/v1/add-to-cart", requestOptions)
+            .then((response) =>{
+                return response.text()})
+            .then((result) => {
+                console.log(result);
+            })
+            .catch((error) => console.log("cannot add item to cart", error));
+ 
     }
     function itemDelete(event)
     {
@@ -212,43 +228,31 @@
             })
             .catch((error) => console.log("cannot add item", error));
     }
-    function update(){
-
+    updateItemForm.onsubmit = async (e) => {
+        e.preventDefault();
         let productId=idProduct;
-        let productName=document.getElementById('changeproductName').value;
-        let price = document.getElementById('changeprice').value;
-        let quantity= document.getElementById('changequantity').value;
-
-        var myHeaders = new Headers();
-        myHeaders.append("Content-Type", "application/json");
-
-        var raw = JSON.stringify({
-        productId: productId,
-        productName: productName,
-        price: price,
-        quantity: quantity
-        });
-
-        let requestOptions = {
-            method: "POST",
-            headers: myHeaders,
-            body: raw,
-            redirect: "follow",
-            mode: 'cors',
-            cache: 'default',
-            };
-
-            fetch("/api/v1/update-item", requestOptions)
-            .then((response) =>{
+        let formdata= new FormData(updateItemForm);
+        formdata.append("productId",productId)
+        console.log(formdata)
+        let response = await fetch('/api/v1/update-item', {
+        method: 'POST',
+        body: formdata
+        }).then((response) =>{
                 return response.text()})
             .then((result) => {
                 console.log(result);
             })
-            .catch((error) => console.log("cannot add item", error));
+            .catch((error) => console.log("cannot update item", error));
+            window.location.reload(true); 
     }
     function history(){
         let useremail=document.getElementById('email').innerHTML;
         let link=`http://localhost:3000/api/v1/transaction-history?email=${useremail}`;
+        window.open(link,'_blank')
+    }
+    function usercart(){
+        let useremail=document.getElementById('email').innerHTML;
+        let link=`http://localhost:3000/render-cart?email=${useremail}`;
         window.open(link,'_blank')
     }
     function setform(event)
