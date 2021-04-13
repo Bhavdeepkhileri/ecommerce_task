@@ -24,6 +24,7 @@
                                     <th>product name</th>
                                     <th>quantity</th>
                                     <th>price</th>
+                                    <th>image</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -32,6 +33,7 @@
                                     <td><%=transcation[i].products[j].productId.productName%></td>
                                     <td><%=transcation[i].products[j].quantity%></td>
                                     <td><%=transcation[i].products[j].productId.price%></td>
+                                    <td> <img src="data:image/png;base64, <%=transcation[i].products[j].productId.img%>" alt="Red dot" height="50px" /></td>
                                     </tr>
                                 <%}%>
                             </tbody>

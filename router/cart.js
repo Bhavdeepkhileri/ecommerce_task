@@ -9,6 +9,8 @@ const Product = require("../models/product");
 const Transcation = require("../models/transcation");
 const Cart = require("../models/cart");
 
+
+
 router.post("/api/v1/add-to-cart", async (req, res) => {
   const user = await User.findOne({ email: req.body.email });
   let findCart = await Cart.findOne({
@@ -24,7 +26,7 @@ router.post("/api/v1/add-to-cart", async (req, res) => {
     } catch (err) {
       console.log(err);
     }
-    findCart = cart._id;
+    findCart = cart;
   }
   let productarray=findCart.products
   for(let i=0; i<productarray.length;i++)
@@ -57,6 +59,24 @@ router.post("/api/v1/add-to-cart", async (req, res) => {
   }
 });
 
+router.post('/api/v1/edit-cart',async(req,res)=>{
+  try{
+  const user=await User.findOne({email: req.body.email});
+  const cart=await Cart.updateOne({userId: new mongoose.Types.ObjectId(user._id)},
+                                  {$set:{"products.$[elem].quantity": +req.body.quantity}},
+                                  {
+                                    arrayFilters:[{"elem.productId":{$eq: new mongoose.Types.ObjectId(req.body.productId)}}]
+                                  });
+   console.log(cart);
+   res.send("cart updated");
+  }
+  catch(err)
+  {
+    console.log(err)
+    res.send("error")
+  }
+})
+
 router.get('/api/v1/render-cart',async(req,res)=>{
   var passedVariable = req.query.email;
   const user=await User.findOne({email: passedVariable});
@@ -85,11 +105,18 @@ router.post('/api/v1/cart-remove-item',async(req,res)=>{
 
 router.post('/api/v1/checkout',async(req,res)=>{
   const user = await User.findOne({ email: req.body.email });
-  const cart = await Cart.findOne({userId: new mongoose.Types.ObjectId(user._id)}).populate('products.productId')
+  const cart = await Cart.findOne({userId: new mongoose.Types.ObjectId(user._id)}).populate('products.productId');
+cart instanceof Cart; // true
+cart instanceof mongoose.Model; // true
+cart instanceof mongoose.Document; // true
   let checkoutObj={
     products:cart.products,
     totalAmount: req.body.totalAmount,
     userId: new mongoose.Types.ObjectId(user._id)
+  }
+  if(cart.products.length==0)
+  {
+    return res.send("cart is empty");
   }
   for(let i=0; i<cart.products.length;i++)
   {
@@ -101,6 +128,8 @@ router.post('/api/v1/checkout',async(req,res)=>{
       console.log(err);
     }
   }
+  cart.products=[]
+  await cart.save();
   const transaction = new Transcation(checkoutObj)
   transaction.save().then(()=>{
     res.send("items are bought");

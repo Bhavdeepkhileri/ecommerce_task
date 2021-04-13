@@ -111,11 +111,9 @@ router.post('/api/v1/update-item',upload.single(),async (req,res)=>{
     /*
     updating prodcut
     */
-   console.log(req.body);
     const updateItem = await Product.updateOne({_id:new mongoose.Types.ObjectId(req.body.productId)},{$set:{productName:req.body.productName,
     price: req.body.price,
     quantity: req.body.quantity}});
-    console.log(updateItem);
     res.send("item updated");
 })
 

@@ -13,8 +13,12 @@
         </style>
     </head>
     <body>
+        <img src="data:image/png;base64, <%= user.img%>" alt="Red dot" height="100px" />
         <h1>Welcome <%=user.name%></h1>
+        <div>
         <p id="email"><%=user.email%></p>
+        <a href="http://localhost:3000/"><button type="button" class="btn btn-info">Logout</button></a>
+        </div>
         <!--
             form to add item to the database
         -->
@@ -28,7 +32,7 @@
             </div>
             <div class="form-group">
                 <label for="qunatity">Quantity</label>
-                <input type="text" class="form-control" id="quantity" name="qunatity" placeholder="Enter available quantity" required>
+                <input type="text" class="form-control" id="quantity" name="quantity" placeholder="Enter available quantity" required>
             </div>
             <div class="form-group">
                 <label for="img">Item Image</label>
@@ -37,9 +41,11 @@
             <button type="submit" class="btn btn-primary"> Add Item</button>
         </form>
         <br><br>
+            <div style="display:inline;">
+                <button type="button" class="btn btn-secondary" onClick="history()">Purchase history</button>
+                <button type="button" class="btn btn-secondary" onClick="viewcart()">Cart</button>
 
-        <button type="button" class="btn btn-secondary" onClick="history()">Purchase history</button>
-
+            </div>
         <h3>Product list:</h3>
         <table class="table">
             <thead>
@@ -50,6 +56,7 @@
                     <th>price</th>
                     <th>quantity</th>
                     <th>seller</th>
+                    <th>image</th>
                 </tr>
             </thead>
             <tbody>
@@ -65,6 +72,7 @@
                       <td><%= quotation[i].price %></td>
                       <td><%= quotation[i].quantity %></td>
                       <td><%= quotation[i].userId.name %></td>
+                      <td><img src="data:image/png;base64, <%= quotation[i].img%>" alt="Red dot" height="50px" /></td>
                       <td><button class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" onClick="setform(this)">update</button></td>
                       <td><button class="btn btn-primary" onclick="itemDelete(this)">delete</button></td>
                       <td><button class="btn btn-primary" onclick="buy(this)">buy</button></td>
@@ -91,6 +99,7 @@
                         <div class="form-group" >
                           <label for="changeproductName">Product Name</label>
                           <input type="text" class="form-control" id="changeproductName"  name="productName" placeholder="Product Name" required>
+                          </div>
                         <div class="form-group">
                           <label for="changeprice">Price</label>
                           <input type="text" class="form-control" id="changeprice" name="price" placeholder="Enter price" required>
@@ -117,7 +126,6 @@
         
         let formdata= new FormData(addItemForm);
         formdata.append("email",useremail)
-
         let response = await fetch('/api/v1/add-item', {
         method: 'POST',
         body: formdata
@@ -127,8 +135,8 @@
                 console.log(result);
             })
             .catch((error) => console.log("cannot add item", error));
-            alert("Item added");;
-
+            alert("Item added");
+            location.reload();
         //let result = await response.json();
     };
     function buy(event){
@@ -166,6 +174,7 @@
                 console.log(result);
             })
             .catch((error) => console.log("cannot add item", error));
+            location.reload();
     }
     function toCart(event)
     {
@@ -176,6 +185,8 @@
         let productId=childs[3].innerHTML;
         let price=childs[7].innerHTML;
         let quantity=prompt("how many item you want to add to cart",1);
+        if(!quantity)
+            return console.log("");
         var raw = JSON.stringify({
         productId: productId,
         email: useremail,
@@ -248,6 +259,11 @@
     function history(){
         let useremail=document.getElementById('email').innerHTML;
         let link=`http://localhost:3000/api/v1/transaction-history?email=${useremail}`;
+        window.open(link,'_blank')
+    }
+    function viewcart(){
+        let useremail=document.getElementById('email').innerHTML;
+        let link=`http://localhost:3000/api/v1/render-cart?email=${useremail}`;
         window.open(link,'_blank')
     }
     function usercart(){
