@@ -75,6 +75,7 @@ router.post('/api/v1/purchase-item',(req,res)=>{
             return res.send("some error occured");
         }
         let temp={}
+        let send=[];
         for (const [key, value] of Object.entries(req.body)) {
             if(key=='email')
             {
@@ -86,13 +87,22 @@ router.post('/api/v1/purchase-item',(req,res)=>{
                 temp['products']={};
                 temp['products']['productId']=new mongoose.Types.ObjectId(value);
                 temp['products']['quantity']=+req.body.quantity;
-                let obj= await Product.updateOne({_id: new mongoose.Types.ObjectId(value)},{$inc: {quantity:-1*+req.body.quantity}});
+                let product =await Product.findOne({_id: new mongoose.Types.ObjectId(value)});
+                product instanceof Product; // true
+                product instanceof mongoose.Model; // true
+                product instanceof mongoose.Document; // true
+                if(product.quantity< +req.body.quantity)
+                {
+                    return res.send("item cannot be bought");
+                }
+                product.quantity-=+req.body.quantity;
+                await product.save();
                 continue;
             }
             temp[key]=value;
           }
-        const product=new Transcation(temp);
-        product.save().then(()=>{
+        const transaction=new Transcation(temp);
+        transaction.save().then(()=>{
             res.send("item is bought");
         }).catch((e)=>{res.send(e)})
     })

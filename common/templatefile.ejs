@@ -9,7 +9,6 @@
             form{
                 margin-bottom: 25px;
             }
-            
         </style>
     </head>
     <body>
@@ -19,32 +18,11 @@
         <p id="email"><%=user.email%></p>
         <a href="http://localhost:3000/"><button type="button" class="btn btn-info">Logout</button></a>
         </div>
-        <!--
-            form to add item to the database
-        -->
-        <form id="addItemForm">
-            <div class="form-group" >
-              <label for="productName">Product Name</label>
-              <input type="text" class="form-control" id="productName" name="productName" placeholder="Product Name" required>
-            <div class="form-group">
-              <label for="price">Price</label>
-              <input type="text" class="form-control" id="price" name="price" placeholder="Enter price" required>
-            </div>
-            <div class="form-group">
-                <label for="qunatity">Quantity</label>
-                <input type="text" class="form-control" id="quantity" name="quantity" placeholder="Enter available quantity" required>
-            </div>
-            <div class="form-group">
-                <label for="img">Item Image</label>
-                <input type="file" class="form-control" id="img" name="img" placeholder="Enter available quantity" required>
-            </div>
-            <button type="submit" class="btn btn-primary"> Add Item</button>
-        </form>
         <br><br>
             <div style="display:inline;">
+                <button type="button" class="btn btn-secondary" onClick="addItem()">addItem</button>
                 <button type="button" class="btn btn-secondary" onClick="history()">Purchase history</button>
                 <button type="button" class="btn btn-secondary" onClick="viewcart()">Cart</button>
-
             </div>
         <h3>Product list:</h3>
         <table class="table">
@@ -75,7 +53,7 @@
                       <td><img src="data:image/png;base64, <%= quotation[i].img%>" alt="Red dot" height="50px" /></td>
                       <td><button class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" onClick="setform(this)">update</button></td>
                       <td><button class="btn btn-primary" onclick="itemDelete(this)">delete</button></td>
-                      <td><button class="btn btn-primary" onclick="buy(this)">buy</button></td>
+                      <td><button class="btn btn-primary" data-toggle="modal" data-target="#buyitemform" onclick="setbuyform(this)">buy</button></td>
                       <td><button class="btn btn-primary" onClick="toCart(this)">Add to cart</button></td>
                     </tr> 
                     <%}%>   
@@ -117,40 +95,47 @@
               </div>
             </div>
           </div>
+          <!--pop up form for the buy item-->
+          <div class="modal fade" id="buyitemform" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">How much qunatity you want to buy?</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                    <select name="quantity" id="buyitem">
+                    </select>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-primary" onclick="buy()">Buy</button>
+                </div>
+              </div>
+            </div>
+          </div>
     </body>
     <script>
-        var idProduct=0;
-        addItemForm.onsubmit = async (e) => {
-        e.preventDefault();
+    var idProduct=0;
+    var childelement;
+    function addItem(){
         let useremail=document.getElementById('email').innerHTML;
-        
-        let formdata= new FormData(addItemForm);
-        formdata.append("email",useremail)
-        let response = await fetch('/api/v1/add-item', {
-        method: 'POST',
-        body: formdata
-        }).then((response) =>{
-                return response.text()})
-            .then((result) => {
-                console.log(result);
-            })
-            .catch((error) => console.log("cannot add item", error));
-            alert("Item added");
-            location.reload();
-        //let result = await response.json();
-    };
-    function buy(event){
-        console.log("working");
+        let link=`http://localhost:3000/addItemForm.html?email=${useremail}`;
+        window.open(link,'_blank')
+    }
+    function buy(){
         var myHeaders = new Headers();
         var useremail=document.getElementById('email').innerHTML;
         myHeaders.append("Content-Type", "application/json");
-        quantity=+prompt("how many item do you want?",1);
-        if(!quantity)
-            return;
-        let childs= event.parentNode.parentNode.childNodes;
-        let productId=childs[3].innerHTML;
+        
+        let quantity= +document.getElementById('buyitem').value;
+        let childs= childelement;
+        let productId=idProduct;
+        let instock=+childs[5].innerHTML;
         let price=childs[7].innerHTML;
-        console.log(quantity*+price)
+        console.log(quantity);
         var raw = JSON.stringify({
         email: useremail,
         productId: productId,
@@ -174,7 +159,7 @@
                 console.log(result);
             })
             .catch((error) => console.log("cannot add item", error));
-            location.reload();
+           // location.reload();
     }
     function toCart(event)
     {
@@ -237,7 +222,7 @@
             .then((result) => {
                 console.log(result);
             })
-            .catch((error) => console.log("cannot add item", error));
+            .catch((error) => console.log("cannot delete item", error));
     }
     updateItemForm.onsubmit = async (e) => {
         e.preventDefault();
@@ -278,6 +263,26 @@
         document.getElementById('changeproductName').value=childs[5].innerHTML;
         document.getElementById('changeprice').value=childs[7].innerHTML;
         document.getElementById('changequantity').value=childs[9].innerHTML;
+    }
+    function setbuyform(event)
+    {
+        let childs=event.parentNode.parentNode.childNodes;
+        childelement=childs;
+        idProduct=childs[3].innerHTML;
+        let temp=document.querySelector("#buyitem");
+        let instock=+childs[9].innerHTML;
+        temp.innerHTML="";
+        for(var i=1;i<=instock && i<=30;i++)
+			{
+				let option=document.createElement('option');
+				option.innerHTML=i;
+				option.setAttribute("value",i);
+                if(i==1)
+                {
+                    option.setAttribute("selected",true);
+                }
+				temp.appendChild(option);
+			}
     }
     </script>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>

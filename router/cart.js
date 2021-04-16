@@ -106,9 +106,9 @@ router.post('/api/v1/cart-remove-item',async(req,res)=>{
 router.post('/api/v1/checkout',async(req,res)=>{
   const user = await User.findOne({ email: req.body.email });
   const cart = await Cart.findOne({userId: new mongoose.Types.ObjectId(user._id)}).populate('products.productId');
-cart instanceof Cart; // true
-cart instanceof mongoose.Model; // true
-cart instanceof mongoose.Document; // true
+  cart instanceof Cart; // true
+  cart instanceof mongoose.Model; // true
+  cart instanceof mongoose.Document; // true
   let checkoutObj={
     products:cart.products,
     totalAmount: req.body.totalAmount,
@@ -121,7 +121,18 @@ cart instanceof mongoose.Document; // true
   for(let i=0; i<cart.products.length;i++)
   {
     try{
-    await Product.updateOne({_id: cart.products[i].productId},{$inc: {quantity:-1*+cart.products[i].quantity}});
+    //await Product.updateOne({_id: cart.products[i].productId},{$inc: {quantity:-1*+cart.products[i].quantity}});
+     // console.log(cart.products[i].productId._id);
+    let product =await Product.findOne({_id: new mongoose.Types.ObjectId(cart.products[i].productId._id)});
+      product instanceof Product; // true
+      product instanceof mongoose.Model; // true
+      product instanceof mongoose.Document; // true
+      if(product.quantity< cart.products[i].quantity)
+      {
+          return res.send("some item in cart are out of stock remove them to checkout");
+      }
+      product.quantity-=+cart.products[i].quantity;
+      await product.save();
     }
     catch(err)
     {

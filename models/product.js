@@ -20,6 +20,7 @@ const Product = mongoose.model('Product', {
     },
     quantity:{
         type: Number,
+        min:0,
         required: true,
         default: 1
     },

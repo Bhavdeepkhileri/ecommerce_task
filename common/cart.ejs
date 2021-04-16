@@ -34,6 +34,9 @@
                         <td class="ndisplay"><%= cart.products[i].productId._id %></td>
                         <td><%= cart.products[i].productId.productName %></td>
                         <td><select name="quantity" onchange="editCart(this)">
+                            <% if(cart.products[i].productId.quantity==0) {%>
+                                <option value='out of stock' selected>out of stock</option>
+                                <%}%>
                             <% for(var j= 1; j <= cart.products[i].productId.quantity && j<=30 ; j++) { %>
                                 <% if(cart.products[i].quantity==j) {%>
                                     <option value='<%= j %>' selected><%= j %></option>
@@ -110,7 +113,7 @@
             .then((response) =>{
                 return response.text()})
             .then((result) => {
-                console.log(result);
+                alert(result);
             })
             .catch((error) => console.log("cannot be purchased", error));
             location.reload();
@@ -138,7 +141,7 @@
             .then((response) =>{
                 return response.text()})
             .then((result) => {
-                console.log(result);
+                alert(result);
             })
             .catch((error) => console.log("cannot be purchased", error));
             location.reload();
