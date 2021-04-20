@@ -12,7 +12,7 @@
         </style>
     </head>
     <body>
-        <img src="data:image/png;base64, <%= user.img%>" alt="Red dot" height="100px" />
+        <img src="http://localhost:3000/upload/userprofile/<%= user.img%>" alt="Red dot" height="100px" />
         <h1>Welcome <%=user.name%></h1>
         <div>
         <p id="email"><%=user.email%></p>
@@ -50,7 +50,7 @@
                       <td><%= quotation[i].price %></td>
                       <td><%= quotation[i].quantity %></td>
                       <td><%= quotation[i].userId.name %></td>
-                      <td><img src="data:image/png;base64, <%= quotation[i].img%>" alt="Red dot" height="50px" /></td>
+                      <td><img src="http://localhost:3000/upload/product-image/<%= quotation[i].img%>" alt="Red dot" height="50px" /></td>
                       <td><button class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" onClick="setform(this)">update</button></td>
                       <td><button class="btn btn-primary" onclick="itemDelete(this)">delete</button></td>
                       <td><button class="btn btn-primary" data-toggle="modal" data-target="#buyitemform" onclick="setbuyform(this)">buy</button></td>

@@ -2,7 +2,19 @@ const express= require('express');
 const bcrypt = require('bcrypt');
 const router= new express.Router();
 const multer = require('multer');
-var upload = multer({ })
+const path= require('path');
+const fs= require('fs');
+
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, path.join(__dirname,'../common/upload/userprofile'))
+    },
+    filename: function (req, file, cb) {
+      cb(null, file.fieldname + '-' + Date.now()+path.extname(file.originalname))
+    }
+  })
+   
+  var upload = multer({ storage: storage })
 //schema set up
 const mongoose=require('mongoose');
 const User = require('../models/user');
@@ -15,10 +27,7 @@ router.post('/api/v1/signup',upload.single('avatar'),(req,res)=>{
     */
     const saltRounds = 10;
     const password = req.body.password;
-    const encoded = req.file.buffer.toString('base64')
-    //let buf = Buffer.from(encoded, 'base64');
-    req.body.img=encoded;
-    //console.log(req.body.img)
+    req.body.img=req.file.filename;
     bcrypt.hash(password, saltRounds, function(err, hash) {
         // Store hash in your password DB.
         if(err)
@@ -28,9 +37,10 @@ router.post('/api/v1/signup',upload.single('avatar'),(req,res)=>{
         req.body.password=hash;
         const user = new User(req.body);
         user.save().then(() => {
-            res.send(user)
+            res.send({done:'successfully signed up'})
         }).catch((e) => {
             res.status(400)
+            fs.unlinkSync( req.file.path )
             if(e.driver==true)
                 res.send({value:true});
             else 

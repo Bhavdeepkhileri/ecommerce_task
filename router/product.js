@@ -1,20 +1,33 @@
 const express= require('express');
-const path=require('path');
 const ejs=require('ejs');
 const router= new express.Router();
 const multer= require('multer');
-const upload = multer({})
+const path= require('path');
+const fs= require('fs');
+
+
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, path.join(__dirname,'../common/upload/product-image'))
+    },
+    filename: function (req, file, cb) {
+      cb(null, file.fieldname + '-' + Date.now()+path.extname(file.originalname))
+    }
+  })
+   
+  var upload = multer({ storage: storage })
 //schema set up
 const mongoose=require('mongoose');
 const User = require('../models/user');
 const Product = require('../models/product');
 const Transcation = require('../models/transcation');
 
+
+
 router.post('/api/v1/add-item',upload.single('img'),(req,res)=>{
     /*
     adding item in the database with the help of emaild id of the user
     */
-    const encoded = req.file.buffer.toString('base64')
     //let buf = Buffer.from(encoded, 'base64');
     User.findOne({email: req.body.email},(err,result)=>{
         if(err)
@@ -30,7 +43,7 @@ router.post('/api/v1/add-item',upload.single('img'),(req,res)=>{
             }
             temp[key]=value;
           }
-          temp['img']=encoded;
+          temp['img']=req.file.filename;
         const product=new Product(temp);
         product.save().then(()=>{
             res.send("item is added to product list");

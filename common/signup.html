@@ -18,7 +18,7 @@
   <script>
     formElem.onsubmit = async (e) => {
     e.preventDefault();
-
+      try{
     let response = await fetch('/api/v1/signup', {
       method: 'POST',
       body: new FormData(formElem)
@@ -33,6 +33,11 @@
             alert("signup success full redirecting to login page");
             window.location.replace("http://localhost:3000/login.html");
           }
+        }
+        catch(e)
+        {
+          console.log(e);
+        }
   };
   </script>
 </html>
