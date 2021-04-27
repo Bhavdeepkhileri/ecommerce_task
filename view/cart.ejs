@@ -45,7 +45,7 @@
                             <% } %>
                           </select></td>
                         <td><%= cart.products[i].productId.price %></td>
-                        <td> <img src="data:image/png;base64, <%=cart.products[i].productId.img%>" alt="Red dot" height="50px" /></td>
+                        <td> <img src="http://localhost:3000/upload/product-image/<%=cart.products[i].productId.img%>" alt="Red dot" height="50px" /></td>
                         <td><button class="btn btn-primary" onClick="Remove(this)">Remove</button></td>
                     </tr>
                     <%}%>

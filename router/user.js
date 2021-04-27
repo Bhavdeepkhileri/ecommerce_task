@@ -1,5 +1,5 @@
 const express= require('express');
-const bcrypt = require('bcrypt');
+const auth = require('../middleware/auth')
 const router= new express.Router();
 const multer = require('multer');
 const path= require('path');
@@ -25,19 +25,10 @@ router.post('/api/v1/signup',upload.single('avatar'),(req,res)=>{
     signup api and
     return 400 if email already in use
     */
-    const saltRounds = 10;
-    const password = req.body.password;
     req.body.img=req.file.filename;
-    bcrypt.hash(password, saltRounds, function(err, hash) {
-        // Store hash in your password DB.
-        if(err)
-        {
-            return res.send("some error occured",err)
-        }
-        req.body.password=hash;
         const user = new User(req.body);
         user.save().then(() => {
-            res.send({done:'successfully signed up'})
+            res.send({message:'successfully signed up'})
         }).catch((e) => {
             res.status(400)
             fs.unlinkSync( req.file.path )
@@ -46,7 +37,6 @@ router.post('/api/v1/signup',upload.single('avatar'),(req,res)=>{
             else 
                 res.send(e);
         })
-    });
     
 });
 
@@ -54,22 +44,36 @@ router.post('/api/v1/login',async (req,res)=>{
     /*
     login validation api
     */
-    User.findOne({email: req.body.email},async (err,result)=>{
-        if(err)
-        {
-            return res.send("some error occurred");
-        }
-        if(result==null)
-        {
-            return res.send({response:"Invalid user name or password"})
-        }
-        const match = await bcrypt.compare(req.body.password, result.password);
-        if(!match)
-        {
-            return res.send({response:"Invalid user name or password"});
-        }
-        res.send({email: result.email});
-    })
+    try {
+        const user = await User.findByCredentials(req.body.email, req.body.password)
+        const token = await user.generateAuthToken()
+        res.send({ token })
+    } catch (e) {
+        res.status(400).send()
+    }
 });
+
+router.post('/users/logout', auth, async (req, res) => {
+    try {
+        req.user.tokens = req.user.tokens.filter((token) => {
+            return token.token !== req.token
+        })
+        await req.user.save()
+
+        res.send()
+    } catch (e) {
+        res.status(500).send()
+    }
+})
+
+router.post('/users/logoutAll', auth, async (req, res) => {
+    try {
+        req.user.tokens = []
+        await req.user.save()
+        res.send()
+    } catch (e) {
+        res.status(500).send()
+    }
+})
 
 module.exports =router;

@@ -2,6 +2,7 @@ const express = require("express");
 const path = require("path");
 const ejs = require("ejs");
 const router = new express.Router();
+const auth = require('../middleware/auth')
 //schema set up
 const mongoose = require("mongoose");
 const User = require("../models/user");
@@ -11,14 +12,13 @@ const Cart = require("../models/cart");
 
 
 
-router.post("/api/v1/add-to-cart", async (req, res) => {
-  const user = await User.findOne({ email: req.body.email });
+router.post("/api/v1/add-to-cart",auth, async (req, res) => {
   let findCart = await Cart.findOne({
-    userId: new mongoose.Types.ObjectId(user._id),
+    userId: new mongoose.Types.ObjectId(req.user._id),
   });
   if (findCart == null) {
     const cart = new Cart({
-      userId: new mongoose.Types.ObjectId(user._id),
+      userId: new mongoose.Types.ObjectId(req.user._id),
       products: [],
     });
     try {
@@ -59,7 +59,7 @@ router.post("/api/v1/add-to-cart", async (req, res) => {
   }
 });
 
-router.post('/api/v1/edit-cart',async(req,res)=>{
+router.post('/api/v1/edit-cart',auth,async(req,res)=>{
   try{
   const user=await User.findOne({email: req.body.email});
   const cart=await Cart.updateOne({userId: new mongoose.Types.ObjectId(user._id)},
@@ -77,14 +77,13 @@ router.post('/api/v1/edit-cart',async(req,res)=>{
   }
 })
 
-router.get('/api/v1/render-cart',async(req,res)=>{
-  var passedVariable = req.query.email;
-  const user=await User.findOne({email: passedVariable});
+router.get('/api/v1/render-cart',auth,async(req,res)=>{
+  const user=req.user
   if(user==null)
       return res.send("user does not exist");
   const quotation = await Cart.findOne({userId: new mongoose.Types.ObjectId(user._id)}).populate('products.productId')
   //console.log();
-  ejs.renderFile(path.join(__dirname,'../common/cart.ejs'),{cart:quotation},(err,str)=>
+  ejs.renderFile(path.join(__dirname,'../view/cart.ejs'),{cart:quotation},(err,str)=>
   {
     res.send(str);
  })
