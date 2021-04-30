@@ -2,7 +2,7 @@ const express = require("express");
 const path = require("path");
 const ejs = require("ejs");
 const router = new express.Router();
-const auth = require('../middleware/auth')
+const auth = require('../middleware/authentication/auth')
 //schema set up
 const mongoose = require("mongoose");
 const User = require("../models/user");

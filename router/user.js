@@ -1,5 +1,7 @@
 const express= require('express');
-const auth = require('../middleware/auth')
+const auth = require('../middleware/authentication/auth')
+const validation = require('../middleware/validation/signupvalid')
+const loginValid = require('../middleware/validation/loginvalid')
 const router= new express.Router();
 const multer = require('multer');
 const path= require('path');
@@ -16,11 +18,10 @@ var storage = multer.diskStorage({
    
   var upload = multer({ storage: storage })
 //schema set up
-const mongoose=require('mongoose');
 const User = require('../models/user');
 
 
-router.post('/api/v1/signup',upload.single('avatar'),(req,res)=>{
+router.post('/api/v1/signup',upload.single('avatar'),validation,(req,res)=>{
     /*
     signup api and
     return 400 if email already in use
@@ -33,14 +34,14 @@ router.post('/api/v1/signup',upload.single('avatar'),(req,res)=>{
             res.status(400)
             fs.unlinkSync( req.file.path )
             if(e.driver==true)
-                res.send({value:true});
+                res.send({message:"email already in use"});
             else 
                 res.send(e);
         })
     
 });
 
-router.post('/api/v1/login',async (req,res)=>{
+router.post('/api/v1/login',loginValid,async (req,res)=>{
     /*
     login validation api
     */

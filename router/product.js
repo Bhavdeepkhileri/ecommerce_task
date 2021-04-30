@@ -3,8 +3,8 @@ const ejs=require('ejs');
 const router= new express.Router();
 const multer= require('multer');
 const path= require('path');
-const fs= require('fs');
-
+const auth = require('../middleware/authentication/auth')
+const addItemValid = require('../middleware/validation/addItemvalid')
 
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -18,13 +18,11 @@ var storage = multer.diskStorage({
   var upload = multer({ storage: storage })
 //schema set up
 const mongoose=require('mongoose');
-const User = require('../models/user');
 const Product = require('../models/product');
 const Transcation = require('../models/transcation');
-const auth = require('../middleware/auth')
 
 
-router.post('/api/v1/add-item',upload.single('img'),auth,(req,res)=>{
+router.post('/api/v1/add-item',upload.single('img'),auth,addItemValid,(req,res)=>{
     /*
     adding item in the database with the help of email id of the user
     */
@@ -70,6 +68,7 @@ router.post('/api/v1/purchase-item',auth,async (req,res)=>{
     /*
     purchasing item with help of email of user and decreasing the quantity count in db
     */
+   try{
         let temp={}
         temp['userId']=new mongoose.Types.ObjectId(req.user._id);
         for (const [key, value] of Object.entries(req.body)) {
@@ -81,7 +80,7 @@ router.post('/api/v1/purchase-item',auth,async (req,res)=>{
                 let product =await Product.findOne({_id: new mongoose.Types.ObjectId(value)});
                 if(product.quantity< +req.body.quantity)
                 {
-                    return res.send("item cannot be bought");
+                    return res.send({message:"item cannot be bought"});
                 }
                 product.quantity-=+req.body.quantity;
                 temp['totalAmount']=+req.body.quantity*product.price;
@@ -91,28 +90,42 @@ router.post('/api/v1/purchase-item',auth,async (req,res)=>{
             temp[key]=value;
           }
         const transaction=new Transcation(temp);
-        transaction.save().then(()=>{
-            res.send("item is bought");
-        }).catch((e)=>{res.send(e)})
+        await transaction.save()
+    }
+    catch(e)
+    {
+        res.status(400).send(e);
+    }
 });
 
 router.post('/api/v1/delete-item',auth,async (req,res)=>{
     /*
     deleting prodcut , changing isDelete flag to true
     */
+   try{
     const itemDeleted = await Product.updateOne({_id:new mongoose.Types.ObjectId(req.body.productId)},{$set:{IsDelete:true}});
     console.log(itemDeleted);
-    res.send("item deleted")
+    res.send({message:"item deleted"})
+   }
+   catch(e){
+        res.status(400).send(e);
+   }
 })
 
 router.post('/api/v1/update-item',auth,async (req,res)=>{
     /*
     updating prodcut
     */
+   try{
     const updateItem = await Product.updateOne({_id:new mongoose.Types.ObjectId(req.body.productId)},{$set:{productName:req.body.productName,
     price: req.body.price,
     quantity: req.body.quantity}});
-    res.send("item updated");
+    res.send({message:"item updated"});
+   }
+   catch(e){
+    res.status(400).send(e);
+   }
+
 })
 
 module.exports=router;
